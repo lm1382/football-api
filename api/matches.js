@@ -1,14 +1,14 @@
 // matches.js
 
-const apiUrl = 'https://v3.football.api-sports.io/fixtures?league=44&season=2023'; // The fixtures API URL
+const apiUrl = 'http://localhost:3000/api/fixtures?league=44&season=2023'; // Use the backend API route
 
 // Function to fetch the fixtures data
 async function fetchFixtures() {
   try {
     const response = await fetch(apiUrl, {
       headers: {
-        'x-rapidapi-host': 'v3.football.api-sports.io',
-        'x-rapidapi-key': 'db143d64f86cad0d40101d1dac467a1e', // Replace with your actual API key
+        'x-rapidapi-host': 'v3.football.api-sports.io',  // This is for your backend server's headers
+        'x-rapidapi-key': 'db143d64f86cad0d40101d1dac467a1e', // Replace with your actual API key (though this is used in the server-side code)
       }
     });
 
