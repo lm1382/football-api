@@ -1,32 +1,64 @@
-import axios from 'axios';
+// matches.js
 
-export default async function handler(req, res) {
-    const API_KEY = process.env.API_KEY;
+const apiUrl = 'https://v3.football.api-sports.io/fixtures?league=44&season=2023'; // The fixtures API URL
 
-    try {
-        // Check if the query parameter "id" is provided
-        const leagueId = req.query.id || 44;  // Default to 44 if no id is passed
+// Function to fetch the fixtures data
+async function fetchFixtures() {
+  try {
+    const response = await fetch(apiUrl, {
+      headers: {
+        'x-rapidapi-host': 'v3.football.api-sports.io',
+        'x-rapidapi-key': 'db143d64f86cad0d40101d1dac467a1e', // Replace with your actual API key
+      }
+    });
 
-        // Make the API request
-        const response = await axios.get('https://v3.football.api-sports.io/leagues', {
-            headers: {
-                'x-rapidapi-host': 'v3.football.api-sports.io',
-                'x-rapidapi-key': API_KEY,
-            },
-            params: {
-                id: leagueId,
-                season: 2022,
-            },
-        });
+    const fixturesData = await response.json();
 
-        // Send back the API response
-        if (response.data.results > 0) {
-            res.status(200).json(response.data.response[0]);
-        } else {
-            res.status(404).json({ error: 'No data found for the specified league and season.' });
-        }
-    } catch (error) {
-        console.error('Error fetching data:', error);  // Log error for debugging
-        res.status(500).json({ error: 'Failed to fetch data from the API' });
+    if (fixturesData.errors) {
+      console.error("API Error:", fixturesData.errors);
+      return;
     }
+
+    // Log the data to inspect its structure
+    console.log(fixturesData);
+
+    // Call function to display the fixtures
+    displayFixtures(fixturesData);
+  } catch (error) {
+    console.error("Error fetching fixtures:", error);
+  }
 }
+
+// Function to display the fixtures on the website
+function displayFixtures(data) {
+  const matchScheduleElement = document.getElementById("match-schedule");
+  const fixtures = data.response; // The list of fixtures from the API response
+
+  // Check if there are any fixtures available
+  if (fixtures && fixtures.length > 0) {
+    let fixturesHtml = "<h3>Upcoming Matches:</h3><ul>";
+    
+    fixtures.forEach(fixture => {
+      // Format the fixture date to a readable format
+      const matchDate = new Date(fixture.fixture.date).toLocaleString(); // Example: '12/5/2023, 2:00 PM'
+
+      fixturesHtml += `
+        <li>
+          <strong>${fixture.homeTeam.teamName} vs ${fixture.awayTeam.teamName}</strong>
+          <br>
+          Date: ${matchDate}
+          <br>
+          Venue: ${fixture.fixture.venue.name}
+        </li>
+      `;
+    });
+
+    fixturesHtml += "</ul>";
+    matchScheduleElement.innerHTML = fixturesHtml;
+  } else {
+    matchScheduleElement.innerHTML = "<p>No upcoming matches available.</p>";
+  }
+}
+
+// Call the function to fetch match data when the page loads
+fetchFixtures();
